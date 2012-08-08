@@ -1,7 +1,7 @@
 Highest-connectivity vertex iterator
 ====================================
 
-Specialised graph implementation with specific functionality to efficiently iterate vertices in order of highest degree (connectivity)
+Specialised undirected graph implementation with functionality to efficiently iterate vertices in order of highest degree (connectivity)
 
 Extraction of the most connected vertex reduces the degree of its immediate siblings, and typically changes the ordering of subsequent removal.
 
@@ -19,10 +19,14 @@ Algorithm
             V is removed from O's connections
             O's degree is lowered by 1, and moved to the correct set within M
  
-running time scales as O((m + n) * log (D)) to iterate over all vertices, where m = #edges, n = #vertices, D = cardinality of degrees of all vertices
+running time scales as O((m + n) * log(D)) to iterate over all vertices, where m = number of edges, n = number of vertices, D = cardinality of degrees of all vertices
+
+log(D) can typically be treated as a small constant factor, this isn't typically sensitive to variance in m or n.
 
 Usage
 -----
+
+Vertexes are created implicitly by creating edges between vertexes. Vertexes are represented by unique Strings.
 
     Builder b = MostConnectedVertexGraphIterator.newBuilder();
     b.addEdge("a", "b");
