@@ -1,21 +1,16 @@
 package com.thaze.graphconnectivity;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 
-import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.thaze.graphconnectivity.MostConnectedVertexGraphIterator.Vertex;
 
 /**
  * Specialised graph implementation with specific functionality to efficiently iterate vertices by degree (highest connectivity).<br/>
@@ -40,7 +35,9 @@ import com.thaze.graphconnectivity.MostConnectedVertexGraphIterator.Vertex;
  * </pre></blockquote>
  * running time scales as O((m + n) * log (D)) to iterate over all vertices, where m = #edges, n = #vertices, D = cardinality of degrees of all vertices<br/>
  * <br/>
- * usage:<br/>
+ * Usage:<br/>
+ * <br/>
+ * Vertexes are created implicitly by creating edges between vertexes. Vertexes are represented by unique Strings.<br/>
  * <br/>
  * <blockquote><pre>
  * Builder b = MostConnectedVertexGraphIterator.newBuilder();
@@ -169,59 +166,6 @@ public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 			}
 			g.built=true;
 			return g;
-		}
-	}
-	
-	public class Vertex {
-		private final String _name;
-		private final Set<Vertex> connections = Sets.newLinkedHashSet();
-
-		public Vertex(String name) {
-			_name = name;
-		}
-		
-		public String getName(){
-			return _name;
-		}
-		
-		public Iterable<Vertex> getConnections(){
-			return Collections.unmodifiableSet(connections);
-		}
-		
-		public int getConnectionCount(){
-			return connections.size();
-		}
-		
-		private void add(Vertex other) {
-			connections.add(other);
-		}
-		private boolean remove(Vertex v){
-			return connections.remove(v);
-		}
-
-		@Override
-		public int hashCode() {
-			return _name.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			return _name.equals(((Vertex)o)._name);
-		}
-		
-		@Override
-		public String toString(){
-			
-			return _name + "->" + StringUtils.join(Collections2.transform(connections, new Function<Vertex, String>(){
-				public String apply(Vertex v) {return v._name;}
-			}), "");
-			
-//			return Array.iterableArray(connections).foldLeft(Function.curry(new F2<String, Vertex, String>(){
-//				@Override
-//				public String f(String a, Vertex b) {
-//					return a + b._name;
-//				}
-//			}), _name + "->");
 		}
 	}
 
