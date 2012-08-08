@@ -52,7 +52,7 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
-					<finalName>peakmatch</finalName>
+					<finalName>graphconnectivity</finalName>
 				</configuration>
 			</plugin>
 			<plugin>

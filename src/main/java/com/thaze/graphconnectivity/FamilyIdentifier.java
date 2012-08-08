@@ -2,44 +2,65 @@ package com.thaze.graphconnectivity;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
 
-public class FamilyIndentifier {
+public class FamilyIdentifier {
 
-	public static final String XCORR_POSTPROCESS_FILE = "/home/srodgers/devel/users/srodgers/peakmatch/family/xcorr.postprocess";
-	public static final String XCORR_FAMILY_FILE = "/home/srodgers/devel/users/srodgers/peakmatch/family/xcorr.families";
+	public static final String XCORR_POSTPROCESS_FILE = "xcorr.postprocess";
+	public static final String XCORR_FAMILY_FILE = "xcorr.families";
 
 	public static void main(String[] args) throws IOException {
 		
+		if (args.length != 2){
+			System.err.println("Expected arguments: <input file> <output file>");
+			System.exit(0);
+		}
+		
+		String input = args[0];
+		if (!new File(input).exists()){
+			System.err.println("input file " + input + " not found");
+			System.exit(0);
+		}
+		String output = args[1];
+		
 		MostConnectedVertexGraphIterator.Builder b = MostConnectedVertexGraphIterator.newBuilder();
+		
+		
 
-		try (	BufferedReader br = new BufferedReader(new FileReader(XCORR_POSTPROCESS_FILE)); 
-				BufferedWriter bw = new BufferedWriter(new FileWriter(XCORR_FAMILY_FILE)); ) {
+		try (	BufferedReader br = new BufferedReader(new FileReader(input)); 
+				BufferedWriter bw = new BufferedWriter(new FileWriter(output)); ) {
 			String line;
+			
+			System.out.println("reading file " + input);
 			while (null != (line = br.readLine())) {
 
 				String[] sa = line.split("\t");
-				if (sa.length != 3) {
-					System.err.println("line invalid: '" + line + "'");
-					continue;
+				if (sa.length <= 2) {
+					System.err.println("line invalid, expected tab-separated event names: '" + line + "'");
+					System.exit(0);
 				}
 
 				b.addEdge(sa[0], sa[1]);
 			}
 			
+			System.out.println("iterating by most connected vertex ...");
+			
 			MostConnectedVertexGraphIterator g = b.build();
 			
 			while (g.hasNext()){
 				Vertex v = g.next();
+				
 				// tab-separated, one family per line
 //				bw.write(v.getName() + "\t");
 //				for (Vertex o: v.getConnections())
 //					bw.write(o.getName() + "\t");
 //				bw.write('\n');
-				// family indented
+				
+				// one item per line, indented
 				bw.write(v.getName() + " " + v.getConnectionCount() + "\n");
 				for (Vertex o: v.getConnections())
 					bw.write("\t" + o.getName() + "\n");

@@ -23,8 +23,8 @@ running time scales as O((m + n) * log(D)) to iterate over all vertices, where m
 
 log(D) can typically be treated as a small constant factor, this isn't typically sensitive to variance in m or n.
 
-Usage
------
+Code usage
+----------
 
 Vertexes are created implicitly by creating edges between vertexes. Vertexes are represented by unique Strings.
 
@@ -40,3 +40,23 @@ Vertexes are created implicitly by creating edges between vertexes. Vertexes are
 			...
 		}
     }
+
+Compilation & assembly
+----------------------
+	mvn compile
+    mvn assembly:single
+
+FamilyIdentifier - Usage
+------------------------
+
+input file: one line per edge, tab-separated (anything after the first two columns is ignored)
+eg
+    a	b	<ignored>
+    a	c	<ignored>
+    a	d	<ignored>
+    d	e	<ignored>
+    ...
+
+output file: indented blocks per most-connected mode, with the most connected node at the top with its connectivity count. change FamilyIdentifier's output to whatever you prefer
+
+    java -Xmx2048M -jar target/graphconnectivity-jar-with-dependencies.jar <input file> <output file>
