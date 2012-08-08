@@ -26,7 +26,7 @@ log(D) can typically be treated as a small constant factor, this isn't typically
 Code usage
 ----------
 
-Vertexes are created implicitly by creating edges between vertexes. Vertexes are represented by unique Strings.
+Vertexes are created implicitly by creating edges. Vertexes are represented by unique Strings.
 
     Builder b = MostConnectedVertexGraphIterator.newBuilder();
     b.addEdge("a", "b");
@@ -46,17 +46,19 @@ Compilation & assembly
 	mvn compile
     mvn assembly:single
 
-FamilyIdentifier - Usage
-------------------------
+FamilyIdentifier
+----------------
 
-input file: one line per edge, tab-separated (anything after the first two columns is ignored)
-eg
+Simple wrapper around MostConnectedVertexGraphIterator, reading from input file of graph edges, calculating all sequential highest connectivity vertices and writing to output file
+
+Input file: one line per edge, tab-separated (anything after the first two columns is ignored), eg:
+
     a	b	<ignored>
     a	c	<ignored>
     a	d	<ignored>
     d	e	<ignored>
     ...
 
-output file: indented blocks per most-connected mode, with the most connected node at the top with its connectivity count. change FamilyIdentifier's output to whatever you prefer
+output file: indented section per most-connected mode, with the most connected node at the top of each indented section with its connectivity count. change FamilyIdentifier's output to whatever you prefer
 
     java -Xmx2048M -jar target/graphconnectivity-jar-with-dependencies.jar <input file> <output file>
