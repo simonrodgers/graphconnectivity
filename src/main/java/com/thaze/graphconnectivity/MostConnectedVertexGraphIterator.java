@@ -13,7 +13,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
- * Specialised graph implementation with specific functionality to efficiently iterate vertices by degree (highest connectivity).<br/>
+ * Specialised undirected graph implementation with functionality to efficiently iterate vertices in order of highest degree (connectivity), and remove that vertex and all its immediate connections<br/>
  * <br/>
  * Extraction of the most connected vertex reduces the degree of its immediate siblings, and potentially changes the ordering of 
  * subsequent removal.<br/> 
@@ -22,16 +22,17 @@ import com.google.common.collect.Sets;
  * non-comparison-based sort, which isn't subject to the lower bounds on comparison sorts' running time of O(n log n)<br/>
  * <br/>
  * Note: once built, this is a single-pass stateful iterator - removing each vertex mutates the graph for subsequent calls.<br/>
- *<br/>
+ * <br/>
  * Algorithm:<br/>
  * <br/>
  * <blockquote><pre>
- * Build an ordered map M of {integer degree : [set of all vertices with that degree]}
- * While M is not empty:
- *   an arbitrary vertex V is removed from the set S with highest degree
- *   for each of V's immediately connected vertices O :
- *     V is removed from O's connections
- *     O's degree is lowered by 1, and moved to the correct set within M
+ *   Build an ordered map M of {integer degree : [set of all vertices with that degree]}
+ *   While M is not empty:
+ *       an arbitrary vertex V is removed from the set S with highest degree
+ *       for V and each of V's immediately connected vertices O :
+ *       	for each of O's immediately connected vertices P :
+ *	            O is removed from P's connections
+ *	            P's degree is lowered by 1, and moved to the correct set within M
  * </pre></blockquote>
  * running time scales as O((m + n) * log (D)) to iterate over all vertices, where m = #edges, n = #vertices, D = cardinality of degrees of all vertices<br/>
  * <br/>
@@ -58,7 +59,8 @@ import com.google.common.collect.Sets;
  */
 public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 	
-	private MostConnectedVertexGraphIterator(){} // use Builder
+	// use MostConnectedVertexGraphIterator.newBuilder()
+	private MostConnectedVertexGraphIterator(){}
 
 	// index of {vertex name : vertex} 
 	private final LoadingCache<String, Vertex> index = CacheBuilder.newBuilder().build(new CacheLoader<String, Vertex>() {
@@ -94,10 +96,20 @@ public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 		Set<Vertex> bucket = buckets.get(largestSize);
 		Vertex v = bucket.iterator().next();
 		
+		popVertex(v);
+		for (Vertex sibling: v.getConnections())
+			popVertex(sibling);
+		
+		return v;
+	}
+
+	private void popVertex(Vertex v) throws AssertionError {
 		// remove from this bucket, remove bucket if it's now empty
+		int vertexConnectionSize = v.getConnectionCount();
+		Set<Vertex> bucket = buckets.get(vertexConnectionSize);
 		bucket.remove(v);
 		if (bucket.isEmpty())
-			buckets.remove(largestSize);
+			buckets.remove(vertexConnectionSize);
 		
 		// remove connection to v from all its connections
 		// then move each of those connections down a bucket
@@ -122,21 +134,20 @@ public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 			}
 			otherNewBucket.add(other);
 			
-			// remove from 
+			// remove from other
 			other.remove(v);
 		}
-		
-		return v;
 	}
 
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public static class Builder{
 		
-		private Builder(){} // use Graph.newBuilder()
+		// use MostConnectedVertexGraphIterator.newBuilder()
+		private Builder(){}
 		
 		private final MostConnectedVertexGraphIterator g = new MostConnectedVertexGraphIterator();
 		
