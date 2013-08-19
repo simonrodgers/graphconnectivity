@@ -32,12 +32,12 @@ Vertexes are created implicitly by creating edges. Vertexes are represented by u
     Builder b = MostConnectedVertexGraphIterator.newBuilder();
     b.addEdge("a", "b");
     b.addEdge("a", "c");
-    b.addEdge("c", "d");
+    b.addEdge("c", "d", "optional edge label");
     ...
     MostConnectedVertexGraphIterator g = b.build();
     while (g.hasNext()){
 		Vertex v = g.next();
-		for (Vertex o: v.getConnections()){
+		for (Vertex o: v.getEdges()){ // or v.getEdgeLabels() to return vertexs and their labels
 			...
 		}
     }
@@ -52,14 +52,14 @@ FamilyIdentifier
 
 Simple wrapper around MostConnectedVertexGraphIterator, reading from input file of graph edges. In turn, the largest family (immediately connected sub-graph) is repeatedly removed from the graph, and written to the output file. 
 
-Input file: one line per edge, tab-separated (anything after the first two columns is ignored eg a numeric score), to represent edges in the graph (family relationships):
+Input file: one line per edge, tab-separated, to represent edges in the graph (family relationships). (optional) anything after the first two columns is treated as an edge label.
 
-    a	b	<ignored>
-    a	c	<ignored>
-    a	d	<ignored>
-    d	e	<ignored>
+    a	b	label 1
+    a	c	label 2
+    a	d	label 3
+    d	e	label 4
     ...
 
-output file: indented section per most-connected mode, with the most connected node at the top of each indented section with its connectivity count. change FamilyIdentifier's output to whatever you prefer
+output file: indented section per most-connected node, with the most connected node at the top of each indented section with its connectivity count, and each connected vertex and its label on a separate line. change FamilyIdentifier's output to whatever you prefer
 
     java -Xmx2048M -jar target/graphconnectivity-jar-with-dependencies.jar <input file> <output file>
