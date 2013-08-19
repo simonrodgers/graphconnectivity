@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 
 
 public class FamilyIdentifier {
@@ -38,13 +39,15 @@ public class FamilyIdentifier {
 			System.out.println("reading file " + input);
 			while (null != (line = br.readLine())) {
 
-				String[] sa = line.split("\t");
-				if (sa.length <= 2) {
+				String[] sa = line.split("\t", 3);
+				if (sa.length < 2) {
 					System.err.println("line invalid, expected tab-separated event names: '" + line + "'");
 					System.exit(0);
 				}
 
-				b.addEdge(sa[0], sa[1]);
+				// optional label - everything after the second column
+				String label = sa.length > 2 ? sa[2] : null;
+				b.addEdge(sa[0], sa[1], label);
 			}
 			
 			System.out.println("iterating by most connected vertex ...");
@@ -56,14 +59,14 @@ public class FamilyIdentifier {
 				
 				// tab-separated, one family per line
 //				bw.write(v.getName() + "\t");
-//				for (Vertex o: v.getConnections())
+//				for (Vertex o: v.getEdges())
 //					bw.write(o.getName() + "\t");
 //				bw.write('\n');
 				
 				// one item per line, indented
 				bw.write(v.getName() + " " + v.getConnectionCount() + "\n");
-				for (Vertex o: v.getConnections())
-					bw.write("\t" + o.getName() + "\n");
+				for (Map.Entry<Vertex, String> e: v.getEdgeLabels())
+					bw.write("\t" + e.getKey().getName() + "\t" + e.getValue() + "\n");
 				
 //				System.out.println(v.getName() + " " + v.getConnectionCount());
 			}

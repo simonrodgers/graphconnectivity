@@ -1,16 +1,15 @@
 package com.thaze.graphconnectivity;
 
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Specialised undirected graph implementation with functionality to efficiently iterate vertices in order of highest degree (connectivity), and remove that vertex and all its immediate connections<br/>
@@ -49,7 +48,7 @@ import com.google.common.collect.Sets;
  * MostConnectedVertexGraphIterator g = b.build();
  * while (g.hasNext()){
  *		Vertex v = g.next();
- *		for (Vertex o: v.getConnections()){
+ *		for (Vertex o: v.getEdges()){
  *			...
  *		}
  * }
@@ -97,7 +96,7 @@ public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 		Vertex v = bucket.iterator().next();
 		
 		popVertex(v);
-		for (Vertex sibling: v.getConnections())
+		for (Vertex sibling: v.getEdges())
 			popVertex(sibling);
 		
 		return v;
@@ -113,7 +112,7 @@ public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 		
 		// remove connection to v from all its connections
 		// then move each of those connections down a bucket
-		for (Vertex other: v.getConnections()){
+		for (Vertex other: v.getEdges()){
 			int otherConnectionCount = other.getConnectionCount();
 			
 			// find the existing bucket for the other end of this edge
@@ -150,16 +149,20 @@ public class MostConnectedVertexGraphIterator implements Iterator<Vertex> {
 		private Builder(){}
 		
 		private final MostConnectedVertexGraphIterator g = new MostConnectedVertexGraphIterator();
-		
+
 		public void addEdge(String s1, String s2){
+			addEdge(s1, s2, null);
+		}
+
+		public void addEdge(String s1, String s2, String edgeLabel){
 			if (g.built)
 				throw new IllegalStateException("graph already built");
 			
 			Vertex v1 = g.index.getUnchecked(s1);
 			Vertex v2 = g.index.getUnchecked(s2);
 			
-			v1.add(v2);
-			v2.add(v1);
+			v1.add(v2, edgeLabel);
+			v2.add(v1, edgeLabel);
 		}
 		
 		public MostConnectedVertexGraphIterator build(){
